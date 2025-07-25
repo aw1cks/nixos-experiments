@@ -65,6 +65,7 @@
     htop
 
     kitty
+    fastfetch
   ];
 
   programs.zsh.enable = true;
@@ -111,7 +112,7 @@
       useEFIBoot = true;
       qemu.options = [
         # Better graphics performance
-        "-vga qxl"
+        "-device virtio-gpu-pci"
       ];
     };
   };
