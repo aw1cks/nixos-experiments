@@ -1,11 +1,11 @@
-.PHONY: build run ssh clean help
+.PHONY: build run ssh rm clean help
 .DEFAULT_GOAL := help
 
 # VM configuration name
 VM_NAME := nixosvirt01
 
 # Build the VM
-build: ## Build the NixOS VM
+build: rm ## Build the NixOS VM
 	@echo "Building NixOS VM configuration..."
 	nix build .#nixosConfigurations.$(VM_NAME).config.system.build.vmWithBootLoader
 
@@ -18,18 +18,12 @@ run: build ## Build and run the NixOS VM
 ssh:
 	ssh -oUserKnownHostsFile=/dev/null -oStrictHostKeyChecking=no alex@localhost -p 2221
 
-# Clean up all VM artifacts
-clean: ## Clean up VM files and run garbage collection
+rm: ## Remove VM files
 	@echo "Cleaning up VM artifacts..."
-	@if [ -L result ]; then rm -v result; fi
-	@if [ -f $(VM_NAME).qcow2 ]; then rm -v $(VM_NAME).qcow2; fi
-	@echo "Running nix garbage collection..."
-	nix-collect-garbage -d
+	rm -vf result $(VM_NAME).qcow2 $(VM_NAME)-efi-vars.fd
 
-# Force clean (remove files even if they don't exist)
-clean-force: ## Force clean all artifacts (ignore missing files)
-	@echo "Force cleaning VM artifacts..."
-	rm -rf result $(VM_NAME).qcow2
+clean: rm ## Clean up VM files and run garbage collection
+	@echo "Running nix garbage collection..."
 	nix-collect-garbage -d
 
 # Check if VM is built

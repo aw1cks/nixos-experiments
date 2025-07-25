@@ -63,22 +63,35 @@
     curl
     lshw
     htop
+
+    kitty
   ];
 
   programs.zsh.enable = true;
   # Make sure we don't get nagged to configure zsh
   system.userActivationScripts.zshrc = "touch .zshrc";
 
+
   services.openssh.enable = true;
 
-  # Enable the X11 windowing system and GNOME
-  services.xserver.enable = true;
-  services.xserver.xkb.layout = "us";
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.displayManager.gdm.wayland = false;
-  services.xserver.desktopManager.gnome.enable = true;
+  services.displayManager.ly = {
+    enable = true;
+    settings = {
+      load = true;
+      save = true;
+      clear_password = true;
+      shutdown_cmd = "/run/current-system/sw/bin/systemctl poweroff";
+      restart_cmd = "/run/current-system/sw/bin/systemctl reboot";
+    };
+  };
+  services.gnome.gnome-keyring.enable = true;
+  security.polkit.enable = true;
+  programs.hyprland = {
+    enable = true;
+    xwayland.enable = true;
+  };
+  environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
-  # Enable sound with pipewire (recommended for GNOME)
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -87,6 +100,8 @@
     pulse.enable = true;
   };
 
+  services.qemuGuest.enable = true;
+  services.spice-vdagentd.enable = true;
   virtualisation.vmVariantWithBootLoader = {
     virtualisation = {
       cores = 4;
@@ -96,7 +111,7 @@
       useEFIBoot = true;
       qemu.options = [
         # Better graphics performance
-        "-vga virtio"
+        "-vga qxl"
       ];
     };
   };
