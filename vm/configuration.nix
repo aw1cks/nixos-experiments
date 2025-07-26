@@ -33,7 +33,15 @@
   i18n.defaultLocale = "en_US.UTF-8";
 
   users.mutableUsers = false;
-  security.sudo.wheelNeedsPassword = false;
+  security.sudo.enable = false;
+  security.doas = {
+    enable = true;
+    extraRules = [{
+      groups = [ "wheel" ];
+      keepEnv = true;
+      noPass = true;
+    }];
+  };
 
   users.users.alex = {
     initialPassword = "alex";
