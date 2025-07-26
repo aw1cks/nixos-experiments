@@ -2,7 +2,7 @@
 .DEFAULT_GOAL := help
 
 # VM configuration name
-VM_NAME := nixosvirt01
+VM_NAME ?= nixosvirt01
 
 # Build the VM
 build: rm ## Build the NixOS VM

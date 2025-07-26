@@ -1,20 +1,11 @@
 { options, config, lib, pkgs, ... }:
 {
-  imports = [
-    ./disk-config.nix
-  ];
-
   nix.settings.trusted-users = [ "root" "alex" ];
   nix.gc = {
     automatic = true;
     dates = "weekly";
     options = "--delete-older-than 7d";
   };
-
-  hardware.cpu.amd = {
-    updateMicrocode = true;
-    ryzen-smu.enable = true;
-  }
 
   boot.loader.systemd-boot = {
     enable = true;
@@ -46,25 +37,6 @@
       keepEnv = true;
       noPass = true;
     }];
-  };
-
-  users.users.alex = {
-    initialPassword = "alex";
-    isNormalUser = true;
-    description = "alex";
-    extraGroups = [
-      "alex"
-      "wheel"
-      "networkmanager"
-    ];
-
-    shell = pkgs.zsh;
-
-    packages = with pkgs; [];
-
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 aaaac3nzac1lzdi1nte5aaaaipwvacwmbdrpk3nypxbxuhknuvoy4ewn2cfgtg3icxek alex@desktop"
-    ];
   };
 
   environment.systemPackages = with pkgs; [

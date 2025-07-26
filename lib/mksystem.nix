@@ -1,0 +1,31 @@
+# Inspired by https://github.com/mitchellh/nixos-config/blob/88f305ebd02c88451b7f280082d4f4bf9a6142c8/lib/mksystem.nix
+{ nixpkgs, inputs }:
+
+name:
+{
+  system,
+  user
+}:
+
+let
+  machineConfig = ../machines/${name}.nix;
+  userOSConfig  = ../users/${user}/nixos.nix;
+  userHMConfig  = ../users/${user}/home-manager.nix;
+
+in nixpkgs.lib.nixosSystem {
+  inherit system;
+
+  modules = [
+    { nixpkgs.config.allowUnfree = true; }
+
+    machineConfig
+    userOSConfig
+    # inputs.home-manager.nixosModules.home-manager {
+    #   home-manager.useGlobalPkgs = true;
+    #   home-manager.useUserPackages = true;
+    #   home-manager.users.${user} = import userHMConfig {
+    #     inputs = inputs;
+    #   };
+    # }
+  ];
+}
