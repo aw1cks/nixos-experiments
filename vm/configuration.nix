@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ options, config, lib, pkgs, ... }:
 {
   imports = [
     ./disk-config.nix
@@ -10,6 +10,11 @@
     dates = "weekly";
     options = "--delete-older-than 7d";
   };
+
+  hardware.cpu.amd = {
+    updateMicrocode = true;
+    ryzen-smu.enable = true;
+  }
 
   boot.loader.systemd-boot = {
     enable = true;
@@ -109,14 +114,17 @@
     pulse.enable = true;
   };
 
-  services.qemuGuest.enable = true;
-  services.spice-vdagentd.enable = true;
+  system.stateVersion = "25.05";
+
+  # Config for testing build in a QEMU VM
+  services.qemuGuest = lib.mkIf (options.virtualisation ? qemu) { enable = true; };
+  services.spice-vdagentd = lib.mkIf (options.virtualisation ? qemu) { enable = true; };
   virtualisation.vmVariantWithBootLoader = {
     virtualisation = {
       cores = 4;
       memorySize = 8192;
       graphics = true;
-      diskSize = 8192;
+      diskSize = 40960;
       useEFIBoot = true;
       qemu.options = [
         # Better graphics performance
@@ -124,6 +132,4 @@
       ];
     };
   };
-
-  system.stateVersion = "25.05";
 }
