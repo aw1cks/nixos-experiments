@@ -26,5 +26,10 @@
         system = "x86_64-linux";
         user   = "alex";
       };
+      nixosConfigurations.dazhbog = mkSystem "dazhbog" {
+        system = "aarch64-linux";
+        user   = "alex";
+        disko  = true;
+      };
     };
 }
