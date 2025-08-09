@@ -5,7 +5,8 @@ name:
 {
   system,
   user,
-  disko ? false
+  disko ? false,
+  homeManager ? false
 }:
 
 let
@@ -23,12 +24,14 @@ in nixpkgs.lib.nixosSystem {
 
     machineConfig
     userOSConfig
-    # inputs.home-manager.nixosModules.home-manager {
-    #   home-manager.useGlobalPkgs = true;
-    #   home-manager.useUserPackages = true;
-    #   home-manager.users.${user} = import userHMConfig {
-    #     inputs = inputs;
-    #   };
-    # }
-  ] ++ nixpkgs.lib.optional disko inputs.disko.nixosModules.disko;
+  ] ++ nixpkgs.lib.optional homeManager (
+    inputs.home-manager.nixosModules.home-manager {
+      home-manager.useGlobalPkgs = true;
+      home-manager.useUserPackages = true;
+      home-manager.users.${user} = import userHMConfig {
+        inherit inputs;
+      };
+    }
+  )
+  ++ nixpkgs.lib.optional disko inputs.disko.nixosModules.disko;
 }
