@@ -4,13 +4,14 @@
 name:
 {
   system,
-  user
+  user,
+  disko ? false
 }:
 
 let
-  machineConfig = ../machines/${name}.nix;
-  userOSConfig  = ../users/${user}/nixos.nix;
-  userHMConfig  = ../users/${user}/home-manager.nix;
+  machineConfig = ../../machines/${name}/configuration.nix;
+  userOSConfig  = ../../users/${user}/nixos.nix;
+  userHMConfig  = ../../users/${user}/home-manager.nix;
 
 in nixpkgs.lib.nixosSystem {
   inherit system;
@@ -27,5 +28,5 @@ in nixpkgs.lib.nixosSystem {
     #     inputs = inputs;
     #   };
     # }
-  ];
+  ] ++ nixpkgs.lib.optional disko inputs.disko.nixosModules.disko;
 }

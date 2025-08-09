@@ -17,7 +17,7 @@
       ...
     }@inputs:
     let
-      mkSystem = import ./lib/mksystem.nix {
+      mkSystem = import ./modules/lib/mksystem.nix {
         inherit nixpkgs inputs;
       };
     in
