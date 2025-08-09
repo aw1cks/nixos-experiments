@@ -1,5 +1,7 @@
 { options, config, lib, pkgs, ... }:
 {
+  my.system.type = "desktop";
+
   imports = [
     ../../modules/core/virtualisation/qemu-guest.nix
     ../../modules/core/bootloader

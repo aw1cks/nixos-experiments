@@ -1,4 +1,4 @@
-{ pkgs, inputs, ... }:
+{ pkgs, inputs, lib, config, ... }:
 {
   users.users.alex = {
     initialHashedPassword = "$y$j9T$dpE4nFt27XXwojxPADtOD/$mW1WiZyM/VcEzzUi2Dm8yMyBdS2CygudIk5FbPqdjP4";
@@ -10,7 +10,7 @@
       "networkmanager"
     ];
 
-    shell = pkgs.zsh;
+    shell = lib.mkIf (config.my.system.type == "desktop") pkgs.zsh;
 
     packages = with pkgs; [];
 

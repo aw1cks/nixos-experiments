@@ -19,6 +19,8 @@ in nixpkgs.lib.nixosSystem {
   modules = [
     { nixpkgs.config.allowUnfree = true; }
 
+    ./system-type.nix
+
     machineConfig
     userOSConfig
     # inputs.home-manager.nixosModules.home-manager {
