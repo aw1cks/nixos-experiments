@@ -20,7 +20,7 @@ in nixpkgs.lib.nixosSystem {
   modules = [
     { nixpkgs.config.allowUnfree = true; }
 
-    ./system-type.nix
+    ./system-facts.nix
 
     machineConfig
     userOSConfig
