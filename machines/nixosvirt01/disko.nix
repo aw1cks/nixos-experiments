@@ -1,20 +1,11 @@
-{ config, inputs, pkgs, ... }:
+{ pkgs, ... }:
 
 {
-  # NOTE: this will require extra setup for cross-compiling
-  # see https://nixos.wiki/wiki/NixOS_on_ARM#Compiling_through_binfmt_QEMU
-  disko.imageBuilder = {
-    enableBinfmt = true;
-    pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
-    kernelPackages = inputs.nixpkgs.legacyPackages.x86_64-linux.linuxPackages_latest;
-  };
-  nixpkgs.hostPlatform = "aarch64-linux";
   disko.devices = {
     disk = {
       disk0 = {
         type = "disk";
-        device = 
-          if config.my.system.isVmBuild then "/dev/vda" else "/dev/sda";
+        device = "/dev/vda";
         imageName = "disko";
         imageSize = "30G";
         content = {
@@ -33,6 +24,9 @@
                 mountpoint = "/boot";
               };
             };
+            zramSwap = {
+              size = "8G";
+            };
             root = {
               size = "100%";
               content = {
@@ -45,5 +39,16 @@
         };
       };
     };
+  };
+  zramSwap = {
+    enable = true;
+    writebackDevice = "/dev/vda3";
+  };
+  # https://wiki.archlinux.org/title/Zram#Optimizing_swap_on_zram
+  boot.kernel.sysctl = {
+    "vm.swappiness" = 180;
+    "vm.watermark_boost_factor" = 0;
+    "vm.watermark_scale_factor" = 125;
+    "vm.page-cluster" = 0;
   };
 }

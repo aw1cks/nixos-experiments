@@ -1,4 +1,7 @@
-{ pkgs, ... }:
+{ config, lib, pkgs, ... }:
+let
+  plymouthEnabled = ((!config.my.system.isVmBuild) && (config.my.system.type == "desktop"));
+in
 {
   imports = [
     ./efi.nix
@@ -11,14 +14,14 @@
     bootspec.enable = true;
 
     kernelPackages = pkgs.linuxPackages_latest;
-    kernelParams = [
+    kernelParams = lib.optionals plymouthEnabled [
       "quiet"
       "splash"
       "rd.systemd.show_status=false"
       "rd.udev.log_level=0"
       "boot.shell_on_fail"
     ];
-    consoleLogLevel = 0;
+    consoleLogLevel = if plymouthEnabled then 0 else 3;
 
     initrd = {
       verbose = false;
@@ -26,7 +29,7 @@
     };
 
     plymouth = {
-      enable = true;
+      enable = plymouthEnabled;
       theme = "rings";
       themePackages = with pkgs; [
         # By default we would install all themes

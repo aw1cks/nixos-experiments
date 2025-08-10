@@ -17,10 +17,10 @@ in
     "8.8.8.8"
     "2001:4860:4860::8888"
   ];
-  networking.hosts = [
-    "${ipv4Addr}" = [ "${networking.hostName}.${networking.domain}" "${networking.hostname}" ]
-    "${ipv6Addr}1" = [ "${networking.hostName}.${networking.domain}" "${networking.hostname}" ]
-  ];
+  networking.hosts = lib.optionalAttrs (!config.my.system.isVmBuild) {
+    "${ipv4Addr}" = [ "${config.networking.hostName}.${config.networking.domain}" config.networking.hostName ];
+    "${ipv6Addr}1" = [ "${config.networking.hostName}.${config.networking.domain}" config.networking.hostName ];
+  };
 
   networking.useDHCP = false;
   networking.dhcpcd.enable = false;
@@ -29,27 +29,43 @@ in
       no-auto-default = "*";
     };
   };
-  networking.networkmanager.ensureProfiles.profiles = {
-    wan = {
-      connection = {
-        id = "wan";
-        type = "ethernet";
-        interface-name = "enp1s0";
-        autoconnect-priority = "100";
+  networking.networkmanager.ensureProfiles.profiles = lib.mkMerge [
+    (lib.mkIf config.my.system.isVmBuild {
+      qemu = {
+        connection = {
+          id = "qemu";
+          type = "ethernet";
+          interface-name = "enp1s0";
+          autoconnect-priority = "100";
+        };
+        ethernet = {};
+        ipv4 = {
+          method = "auto";
+        };
       };
-      ethernet = {};
-      ipv4 = {
-        method = "manual";
-        address1 = "${ipv4Addr}/${ipv4Cidr},172.31.1.1";
-        route1 = "172.31.1.1";
+    })
+    (lib.mkIf (!config.my.system.isVmBuild) {
+      wan = {
+        connection = {
+          id = "wan";
+          type = "ethernet";
+          interface-name = "enp1s0";
+          autoconnect-priority = "100";
+        };
+        ethernet = {};
+        ipv4 = {
+          method = "manual";
+          address1 = "${ipv4Addr}/${ipv4Cidr},172.31.1.1";
+          route1 = "172.31.1.1";
+        };
+        ipv6 = {
+          method = "manual";
+          address1 = "${ipv6Addr}/${ipv6Cidr},fe80::1";
+          route1 = "::/0,fe80::1";
+        };
       };
-      ipv6 = {
-        method = "manual";
-        address1 = "${ipv6Addr}/${ipv6Cidr},fe80::1";
-        route1 = "::/0,fe80::1";
-      };
-    };
-  };
+    })
+  ];
 
   # Allow murmur traffic
   networking.firewall.allowedTCPPorts = [ 64738 ];

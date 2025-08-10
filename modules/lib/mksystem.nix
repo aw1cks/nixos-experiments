@@ -17,6 +17,8 @@ let
 in nixpkgs.lib.nixosSystem {
   inherit system;
 
+  specialArgs = { inherit inputs; };
+
   modules = [
     { nixpkgs.config.allowUnfree = true; }
 

@@ -3,6 +3,8 @@
   my.system.type = "desktop";
 
   imports = [
+    ./disko.nix
+
     ../../modules/core/virtualisation/qemu-guest.nix
     ../../modules/core/bootloader
 

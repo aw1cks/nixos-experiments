@@ -8,7 +8,8 @@
 
   # https://wiki.nixos.org/wiki/Install_NixOS_on_Hetzner_Cloud#AArch64_(CAX_instance_type)_specifics
   boot.initrd.kernelModules = [ "virtio_gpu" ];
-  boot.kernelParams = [ "console=tty" ];
+  boot.kernelParams =
+    if config.my.system.isVmBuild then [ "console=tty0" "console=ttyS0" ] else [ "console=tty" ];
 
   /*
   zramSwap = {
