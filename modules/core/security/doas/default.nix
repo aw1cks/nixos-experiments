@@ -9,4 +9,6 @@
       noPass = true;
     }];
   };
+
+  environment.systemPackages = [ pkgs.doas-sudo-shim ];
 }
