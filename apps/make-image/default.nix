@@ -10,6 +10,7 @@ hostPkgs.writeShellApplication {
     IMAGE_STORE_PATH=$(nix build --no-link --print-out-paths ".#packages.${hostPkgs.stdenv.hostPlatform.system}.${machineName}")
     printf -- "--> Creating writable image copy: %s.raw...\n" "${machineName}"
     cp --reflink=auto "$IMAGE_STORE_PATH" "${machineName}.raw"
+    chmod 644 "${machineName}.raw"
     printf -- "--> Done: ${machineName}.raw\n"
   '';
 }
