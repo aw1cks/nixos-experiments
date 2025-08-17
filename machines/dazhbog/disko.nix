@@ -15,7 +15,7 @@
         type = "disk";
         device = 
           if config.my.system.isVmBuild then "/dev/vda" else "/dev/sda";
-        imageName = "disko";
+        imageName = "${config.networking.hostName}";
         imageSize = "30G";
         content = {
           type = "gpt";

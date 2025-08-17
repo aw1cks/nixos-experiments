@@ -26,25 +26,70 @@
       mkSystem = import ./modules/lib/mksystem.nix {
         inherit nixpkgs inputs;
       };
-    in
-    {
-      nixosConfigurations.nixosvirt01 = mkSystem "nixosvirt01" {
-        system = "x86_64-linux";
-        user   = "alex";
-        disko  = true;
-      };
-      nixosConfigurations.dazhbog = mkSystem "dazhbog" {
-        system = "aarch64-linux";
-        user   = "alex";
-        disko  = true;
+    in rec {
+      nixosConfigurations = {
+        nixosvirt01 = mkSystem "nixosvirt01" {
+          system = "x86_64-linux";
+          user   = "alex";
+          disko  = true;
+        };
+        dazhbog = mkSystem "dazhbog" {
+          system = "aarch64-linux";
+          user   = "alex";
+          disko  = true;
+        };
       };
 
-      apps.x86_64-linux = {
-        test-vm = {
-          type = "app";
-          program = "${(import ./apps/test-vm { inherit pkgs; })}/bin/test-image";
+      packages =
+        let
+          mkImagePackage = machineName: systemConfig:
+            (systemConfig.pkgs.runCommand "${machineName}-image.raw" {
+              script = systemConfig.config.system.build.diskoImagesScript;
+            } ''
+              ${systemConfig.pkgs.bash}/bin/bash $script --build-memory 16384
+              mv ${machineName}.raw $out
+            '');
+        in
+        {
+          x86_64-linux = nixpkgs.lib.mapAttrs (name: config: mkImagePackage name config) nixosConfigurations;
+          aarch64-linux = nixpkgs.lib.mapAttrs (name: config: mkImagePackage name config) nixosConfigurations;
         };
-        default = self.apps.x86_64-linux.test-vm;
-      };
+
+      apps =
+        let
+          mkTestVmApp = machineName: systemConfig: hostPkgs: {
+            type = "app";
+            program = "${(import ./apps/test-vm/default.nix {
+              pkgs = systemConfig.pkgs;
+              config = systemConfig.config;
+              hostPkgs = hostPkgs;
+              machineName = machineName;
+            })}/bin/test-image";
+          };
+
+          mkMakeImageApp = machineName: hostPkgs: {
+            type = "app";
+            program = "${(import ./apps/make-image/default.nix {
+              hostPkgs = hostPkgs;
+              machineName = machineName;
+            })}/bin/make-image";
+          };
+
+          mkAppsForHost = hostPkgs: (
+            nixpkgs.lib.mapAttrs' (name: config: {
+              name = name;
+              value = mkTestVmApp name config hostPkgs;
+            }) nixosConfigurations
+            //
+            nixpkgs.lib.mapAttrs' (name: config: {
+              name = "make-image-${name}";
+              value = mkMakeImageApp name hostPkgs;
+            }) nixosConfigurations
+          );
+        in
+        {
+          x86_64-linux = (mkAppsForHost nixpkgs.legacyPackages.x86_64-linux) // { default = self.apps.x86_64-linux.nixosvirt01; };
+          aarch64-linux = (mkAppsForHost nixpkgs.legacyPackages.aarch64-linux) // { default = self.apps.aarch64-linux.dazhbog; };
+        };
     };
 }

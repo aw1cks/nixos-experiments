@@ -21,9 +21,13 @@ if ARCH == "aarch64":
 
     efi_firmware = ovmf_aarch64 / "FV/AAVMF_CODE.fd"
     efivars_src = ovmf_aarch64 / "FV/AAVMF_VARS.fd"
+
+    machine = "virt"
 elif ARCH == "x86_64":
     efi_firmware = Path(environ["NIXPKG_X86_64_OVMF__FIRMWARE"])
     efivars_src = Path(environ["NIXPKG_X86_64_OVMF__VARIABLES"])
+
+    machine = "q35"
 else:
     raise RuntimeError("Unknown arch: " + ARCH)
 
@@ -31,20 +35,14 @@ if not all([efi_firmware.is_file(), efivars_src.is_file()]):
     raise RuntimeError("Could not find EFI firmware")
 
 if __name__ == "__main__":
-    with (
-        NamedTemporaryFile(prefix="efivars-") as tmp_efivars,
-        NamedTemporaryFile(prefix="test-image-") as tmp_disk_image,
-    ):
+    with NamedTemporaryFile(prefix="efivars-") as tmp_efivars:
         _ = copy(efivars_src, tmp_efivars.name)
         chmod(tmp_efivars.name, 0o755)
-        _ = copy(DISK_IMAGE, tmp_disk_image.name)
-        chmod(tmp_disk_image.name, 0o755)
-
-        print(tmp_efivars.name, tmp_disk_image.name)
 
         qemu_cmd = [
             f"qemu-system-{ARCH}",
-            *(["-machine", "accel=kvm:tcg"] if ARCH == "x86_64" else []),
+            "-machine",
+            f"{machine},accel=kvm:tcg",
             "-cpu",
             "max",
             "-smp",
@@ -60,7 +58,7 @@ if __name__ == "__main__":
             "-drive",
             f"if=pflash,format=raw,file={tmp_efivars.name}",
             "-drive",
-            f"if=virtio,format=raw,file={tmp_disk_image.name}",
+            f"if=virtio,format=raw,file={DISK_IMAGE}",
             "-device",
             "virtio-gpu-pci",
             *EXTRA_ARGS,

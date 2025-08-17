@@ -1,12 +1,13 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
 {
+  disko.imageBuilder = { pkgs = pkgs; kernelPackages = pkgs.linuxPackages_latest; };
   disko.devices = {
     disk = {
       disk0 = {
         type = "disk";
         device = "/dev/vda";
-        imageName = "disko";
+        imageName = "${config.networking.hostName}";
         imageSize = "30G";
         content = {
           type = "gpt";
