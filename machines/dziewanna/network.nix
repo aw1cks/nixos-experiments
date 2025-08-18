@@ -1,14 +1,14 @@
 { config, lib, pkgs, ... }:
 let
-  ipv4Addr = "188.34.202.238";
-  ipv4Cidr = "32";
+  ipv4Addr = "41.215.240.83";
+  ipv4Cidr = "24";
 
-  ipv6Addr = "2a01:4f8:c2c:72ef::";
-  ipv6Cidr = "64";
+  ipv6Addr = "2a05:300:1:1::6f8";
+  ipv6Cidr = "125";
 in
 {
-  networking.hostName = "dazhbog";
-  networking.domain   = "pub.awicks.io";
+  networking.hostName = "dziewanna";
+  networking.domain = "pub.awicks.io";
 
   networking.networkmanager.dns = "none";
   networking.nameservers = [
@@ -19,16 +19,9 @@ in
   ];
   networking.hosts = lib.optionalAttrs (!config.my.system.isVmBuild) {
     "${ipv4Addr}" = [ "${config.networking.hostName}.${config.networking.domain}" config.networking.hostName ];
-    "${ipv6Addr}1" = [ "${config.networking.hostName}.${config.networking.domain}" config.networking.hostName ];
+    "${ipv6Addr}" = [ "${config.networking.hostName}.${config.networking.domain}" config.networking.hostName ];
   };
 
-  networking.useDHCP = false;
-  networking.dhcpcd.enable = false;
-  networking.networkmanager.settings = {
-    main = {
-      no-auto-default = "*";
-    };
-  };
   networking.networkmanager.ensureProfiles.profiles = lib.mkMerge [
     (lib.mkIf config.my.system.isVmBuild {
       qemu = {
@@ -49,19 +42,23 @@ in
         connection = {
           id = "wan";
           type = "ethernet";
-          interface-name = "enp1s0";
           autoconnect-priority = "100";
         };
-        ethernet = {};
+        ethernet = {
+          mac-address = "52:54:00:ed:9f:52";
+          mtu = "1400";
+        };
         ipv4 = {
           method = "manual";
-          address1 = "${ipv4Addr}/${ipv4Cidr},172.31.1.1";
-          route1 = "172.31.1.1";
+          addresses = "${ipv4Addr}/${ipv4Cidr}";
+          gateway = "41.215.240.254";
+          route-data = "41.215.240.254/32,0.0.0.0,0";
         };
         ipv6 = {
           method = "manual";
-          address1 = "${ipv6Addr}/${ipv6Cidr},fe80::1";
-          route1 = "::/0,fe80::1";
+          addresses = "${ipv6Addr}/${ipv6Cidr}";
+          gateway = "2a05:300:1:1::1";
+          route-data = "2a05:300:1:1::1/128,::0,0";
         };
       };
     })

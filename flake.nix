@@ -31,13 +31,18 @@
       };
     in rec {
       nixosConfigurations = {
-        nixosvirt01 = mkSystem "nixosvirt01" {
+        dazhbog = mkSystem "dazhbog" {
+          system = "aarch64-linux";
+          user   = "alex";
+          disko  = true;
+        };
+        dziewanna = mkSystem "dziewanna" {
           system = "x86_64-linux";
           user   = "alex";
           disko  = true;
         };
-        dazhbog = mkSystem "dazhbog" {
-          system = "aarch64-linux";
+        nixosvirt01 = mkSystem "nixosvirt01" {
+          system = "x86_64-linux";
           user   = "alex";
           disko  = true;
         };

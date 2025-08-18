@@ -4,7 +4,6 @@
     enable = true;
     welcometext = "<br />Welcome to <strong>Alex's Mumble server</strong><br />";
 
-    hostName = "*";
     users = 100;
     bandwidth = 130000;
     sendVersion = true;
@@ -27,4 +26,8 @@
       messagelimit=9999
     '';
   };
+
+  # Allow murmur traffic
+  networking.firewall.allowedTCPPorts = [ 64738 ];
+  networking.firewall.allowedUDPPorts = [ 64738 ];
 }
