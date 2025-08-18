@@ -6,7 +6,8 @@ name:
   system,
   user,
   disko ? false,
-  homeManager ? false
+  homeManager ? false,
+  isVmBuild ? false
 }:
 
 let
@@ -17,7 +18,7 @@ let
 in nixpkgs.lib.nixosSystem {
   inherit system;
 
-  specialArgs = { inherit inputs; };
+  specialArgs = { inherit inputs isVmBuild; };
 
   modules = [
     { nixpkgs.config.allowUnfree = true; }

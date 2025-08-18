@@ -26,6 +26,7 @@
     }@inputs:
     let
       pkgs = nixpkgs.legacyPackages."x86_64-linux";
+      isVmBuild = builtins.getEnv "NIX_VM_BUILD" == "1";
       mkSystem = import ./modules/lib/mksystem.nix {
         inherit nixpkgs inputs;
       };
@@ -35,16 +36,19 @@
           system = "aarch64-linux";
           user   = "alex";
           disko  = true;
+          inherit isVmBuild;
         };
         dziewanna = mkSystem "dziewanna" {
           system = "x86_64-linux";
           user   = "alex";
           disko  = true;
+          inherit isVmBuild;
         };
         nixosvirt01 = mkSystem "nixosvirt01" {
           system = "x86_64-linux";
           user   = "alex";
           disko  = true;
+          inherit isVmBuild;
         };
       };
 
@@ -124,5 +128,7 @@
       in {
         nodes = builtins.map (name: mkDeploy self.nixosConfigurations.${name}) (builtins.attrNames self.nixosConfigurations);
       };
+
+      debug = nixpkgs.lib.mapAttrs (name: value: { isVmBuild = value.config.my.system.isVmBuild; }) nixosConfigurations;
     };
 }

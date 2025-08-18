@@ -1,4 +1,4 @@
-{ lib, inputs, ... }:
+{ lib, inputs, isVmBuild, ... }:
 {
   options.my.system = {
     type = lib.mkOption {
@@ -10,7 +10,7 @@
     isVmBuild = lib.mkOption {
       type = lib.types.bool;
       readOnly = true;
-      default = builtins.getEnv "NIX_VM_BUILD" == "1";
+      default = isVmBuild;
       description = "Whether we are in a test VM build where we may need to vary the config compared to the real environment.";
     };
   };

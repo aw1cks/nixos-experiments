@@ -3,6 +3,8 @@ BUILD_MEM_MB := "16384"
 export TESTVM_NUM_CORES := env("TESTVM_NUM_CORES", "8")
 export TESTVM_MEM_MB    := env("TESTVM_MEM_MB", "16384")
 
+export NIX_VM_BUILD := env("NIX_VM_BUILD", "1")
+
 deploy machine:
     #!/bin/bash
     set -euo pipefail
@@ -19,9 +21,9 @@ testvm machine:
     set -euo pipefail
     rm -vf '{{machine}}.raw'
     printf '{{YELLOW}}{{BOLD}}Building VM{{NORMAL}}\n'
-    NIX_VM_BUILD=1 nix run '.#make-image-{{machine}}'
+    nix run --impure '.#make-image-{{machine}}'
     printf '{{CYAN}}{{BOLD}}Running VM{{NORMAL}}\n'
-    nix run '.#{{machine}}'
+    nix run --impure '.#{{machine}}'
 
 sshvm:
   ssh -oUserKnownHostsFile=/dev/null -oStrictHostKeyChecking=no alex@localhost -p 2222
