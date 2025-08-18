@@ -3,6 +3,11 @@ BUILD_MEM_MB := "16384"
 export TESTVM_NUM_CORES := env("TESTVM_NUM_CORES", "8")
 export TESTVM_MEM_MB    := env("TESTVM_MEM_MB", "16384")
 
+deploy machine:
+    #!/bin/bash
+    set -euo pipefail
+    nix run nixpkgs#deploy-rs -- --flake '.#{{machine}}'
+
 installSsh machine sshAddr:
   nix run github:nix-community/nixos-anywhere -- \
       --build-on auto \

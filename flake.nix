@@ -3,6 +3,8 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
+    deploy-rs.url = "github:serokell/deploy-rs";
+
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -19,6 +21,7 @@
       self,
       nixpkgs,
       disko,
+      deploy-rs,
       ...
     }@inputs:
     let
@@ -91,5 +94,30 @@
           x86_64-linux = (mkAppsForHost nixpkgs.legacyPackages.x86_64-linux) // { default = self.apps.x86_64-linux.nixosvirt01; };
           aarch64-linux = (mkAppsForHost nixpkgs.legacyPackages.aarch64-linux) // { default = self.apps.aarch64-linux.dazhbog; };
         };
+
+      devShells = {
+        x86_64-linux = pkgs.mkShell {
+          packages = with pkgs; [ deploy-rs.packages.x86_64-linux.default just ];
+        };
+        aarch64-linux = pkgs.mkShell {
+          packages = with pkgs; [ deploy-rs.packages.aarch64-linux.default just ];
+        };
+      };
+
+      deploy = let
+        mkDeploy = machine: {
+          hostname = machine.config.networking.hostName;
+          sshUser = "alex";
+          sshPort = 222;
+          fastConnection = true;
+          remoteBuild = true;
+          profiles.system = {
+            user = "root";
+            path = deploy-rs.lib.${machine.pkgs.system}.activate.nixos self.nixosConfigurations.${machine.config.networking.hostName};
+          };
+        };
+      in {
+        nodes = builtins.map (name: mkDeploy self.nixosConfigurations.${name}) (builtins.attrNames self.nixosConfigurations);
+      };
     };
 }
