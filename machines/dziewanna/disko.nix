@@ -4,7 +4,8 @@
     disk = {
       disk0 = {
         type = "disk";
-        device = "/dev/vda";
+        device = 
+          if config.my.system.isVmBuild then "/dev/vda" else "/dev/sda";
         imageName = "${config.networking.hostName}";
         imageSize = "15G";
         content = {
@@ -13,15 +14,6 @@
             bios_boot = {
               size = "1M";
               type = "EF02";
-            };
-            ESP = {
-              size = "512M";
-              type = "EF00";
-              content = {
-                type = "filesystem";
-                format = "vfat";
-                mountpoint = "/boot";
-              };
             };
             zramSwap = {
               size = "1G";
@@ -41,7 +33,7 @@
   };
   zramSwap = {
     enable = true;
-    writebackDevice = "/dev/vda3";
+    writebackDevice = "/dev/sda2";
   };
   # https://wiki.archlinux.org/title/Zram#Optimizing_swap_on_zram
   boot.kernel.sysctl = {

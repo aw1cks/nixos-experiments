@@ -7,7 +7,6 @@
     ./disko.nix
     ./network.nix
 
-    ../../modules/core/bootloader
     ../../modules/core/network
     ../../modules/core/security
     ../../modules/core/nix
